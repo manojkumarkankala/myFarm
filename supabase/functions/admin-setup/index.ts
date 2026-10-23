@@ -116,7 +116,7 @@ Deno.serve(async (req: Request) => {
     const { data: settings } = await admin.from("website_settings").select("id").limit(1).maybeSingle();
     if (!settings) {
       await admin.from("website_settings").insert({
-        site_name: "AgriRent – Agricultural Equipment Booking",
+        site_name: "శ్రీ రేణుక ఎల్లమ్మ హార్వెస్టర్ & డోజర్",
         hero_title: "Book Agricultural Equipment for Your Farming Needs",
         hero_description: "Affordable and convenient agricultural equipment rental services for modern farmers.",
       });
