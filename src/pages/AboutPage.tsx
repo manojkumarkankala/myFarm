@@ -56,7 +56,7 @@ export default function AboutPage({ navigate }: Props) {
             </div>
           </div>
           <div className="overflow-hidden rounded-3xl">
-            <img src="https://images.pexels.com/photos/11070641/pexels-photo-11070641.jpeg?auto=compress&cs=tinysrgb&h=650&w=940" alt="farmers" className="h-full w-full object-cover" />
+            <img src="https://res.cloudinary.com/dptxuxhbm/image/upload/v1792747230/Telugu_Agricultural_Drone_and_Harvester_Services_Banner_xowvle.png" alt="farmers" className="h-full w-full object-cover" />
           </div>
         </div>
       </div>
