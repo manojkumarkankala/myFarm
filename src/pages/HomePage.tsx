@@ -115,7 +115,7 @@ export default function HomePage({ navigate }: Props) {
                 )}
                 <div className="mt-6 flex gap-3">
                   <a href={`tel:${phone}`} className="btn-primary"><Phone size={16} /> Call Owner</a>
-              
+              <a href={waLink} target="_blank" rel="noreferrer" className="btn-outline"><MessageCircle size={16} /> WhatsApp</a>
                 </div>
               </div>
             </div>
