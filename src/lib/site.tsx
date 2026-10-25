@@ -11,7 +11,7 @@ interface SiteContextValue {
 
 const defaultSettings: WebsiteSettings = {
   id: '',
-  site_name: 'AgriRent – Agricultural Equipment Booking',
+  site_name: 'శ్రీ రేణుక ఎల్లమ్మ హార్వెస్టర్ & డోజర్',
   logo_url: null,
   favicon_url: null,
   hero_title: 'Book Agricultural Equipment for Your Farming Needs',
