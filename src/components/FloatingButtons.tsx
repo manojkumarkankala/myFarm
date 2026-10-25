@@ -4,7 +4,7 @@ import { useSite } from '@/lib/site';
 export default function FloatingButtons() {
   const { settings, profile } = useSite();
   const phone = profile?.mobile_number || settings.contact_phone || '8555895018';
-  const whatsapp = profile?.whatsapp_number || '+918341827908';
+  const whatsapp = profile?.whatsapp_number || phone;
   const waLink = `https://wa.me/${whatsapp.replace(/[^0-9]/g, '')}`;
 
   return (
