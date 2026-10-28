@@ -76,17 +76,31 @@ export default function BookingPage({ navigate, query }: Props) {
   }, [bookings, availability, form.booking_date, selectedEqId]);
 
   const today = new Date().toISOString().slice(0, 10);
-  const estPrice = useMemo(() => {
-    if (!selectedEquipment || !form.land_area) return 0;
+
+  // Normalize land area to acres: 1 hectare = 2.471 acres
+  const areaInAcres = useMemo(() => {
     const area = parseFloat(form.land_area) || 0;
-    if (selectedEquipment.pricing_unit.includes('acre')) return selectedEquipment.price * area;
-    if (selectedEquipment.pricing_unit.includes('hour')) {
-      const sh = parseInt(form.start_time || '0', 10);
-      const eh = parseInt(form.end_time || '0', 10);
-      return selectedEquipment.price * Math.max(1, eh - sh);
-    }
+    return form.land_area_unit === 'hectares' ? area * 2.471 : area;
+  }, [form.land_area, form.land_area_unit]);
+
+  // Number of hours between start and end time
+  const hoursCount = useMemo(() => {
+    if (!form.start_time || !form.end_time) return 0;
+    const sh = parseInt(form.start_time.slice(0, 2), 10);
+    const sm = parseInt(form.start_time.slice(3, 5), 10);
+    const eh = parseInt(form.end_time.slice(0, 2), 10);
+    const em = parseInt(form.end_time.slice(3, 5), 10);
+    const diff = eh + em / 60 - (sh + sm / 60);
+    return Math.max(1, diff);
+  }, [form.start_time, form.end_time]);
+
+  const estPrice = useMemo(() => {
+    if (!selectedEquipment) return 0;
+    const unit = selectedEquipment.pricing_unit.toLowerCase();
+    if (unit.includes('hour')) return Math.round(selectedEquipment.price * hoursCount);
+    if (unit.includes('acre')) return Math.round(selectedEquipment.price * areaInAcres);
     return selectedEquipment.price;
-  }, [selectedEquipment, form.land_area, form.start_time, form.end_time]);
+  }, [selectedEquipment, areaInAcres, hoursCount]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -318,6 +332,111 @@ export default function BookingPage({ navigate, query }: Props) {
               </div>
             </div>
 
+            {/* Price breakdown — full width bottom */}
+            <div className="lg:col-span-3">
+              <div className="card overflow-hidden p-0">
+                <div className="bg-gradient-to-r from-green-700 to-green-600 px-6 py-4">
+                  <h2 className="flex items-center gap-2 text-lg font-bold text-white">
+                    <span className="text-2xl">₹</span> Price Breakdown
+                  </h2>
+                </div>
+                <div className="p-6">
+                  {selectedEquipment ? (
+                    <div className="space-y-4">
+                      {/* Rate info */}
+                      <div className="grid gap-3 sm:grid-cols-3">
+                        <div className="rounded-xl bg-stone-50 p-4">
+                          <p className="text-xs font-medium uppercase tracking-wide text-stone-500">Rate</p>
+                          <p className="mt-1 text-2xl font-bold text-stone-900">₹{selectedEquipment.price}</p>
+                          <p className="text-xs text-stone-500">{selectedEquipment.pricing_unit}</p>
+                        </div>
+                        <div className="rounded-xl bg-stone-50 p-4">
+                          <p className="text-xs font-medium uppercase tracking-wide text-stone-500">
+                            {selectedEquipment.pricing_unit.toLowerCase().includes('hour') ? 'Hours' : 'Land Area'}
+                          </p>
+                          <p className="mt-1 text-2xl font-bold text-stone-900">
+                            {selectedEquipment.pricing_unit.toLowerCase().includes('hour')
+                              ? hoursCount
+                              : `${form.land_area || 0} ${form.land_area_unit}`}
+                          </p>
+                          <p className="text-xs text-stone-500">
+                            {selectedEquipment.pricing_unit.toLowerCase().includes('hour')
+                              ? `${form.start_time || '--'} – ${form.end_time || '--'}`
+                              : form.land_area_unit === 'hectares'
+                                ? `≈ ${areaInAcres.toFixed(2)} acres`
+                                : 'total area'}
+                          </p>
+                        </div>
+                        <div className="rounded-xl bg-green-50 p-4 ring-1 ring-green-200">
+                          <p className="text-xs font-medium uppercase tracking-wide text-green-700">Estimated Total</p>
+                          <p className="mt-1 text-2xl font-bold text-green-700">
+                            ₹{new Intl.NumberFormat('en-IN').format(estPrice)}
+                          </p>
+                          <p className="text-xs text-stone-500">Final price confirmed by owner</p>
+                        </div>
+                      </div>
+
+                      {/* Calculation detail */}
+                      <div className="rounded-xl border border-stone-200 bg-white p-4">
+                        <p className="mb-3 text-sm font-semibold text-stone-700">How the price is calculated</p>
+                        <div className="space-y-2 text-sm">
+                          {selectedEquipment.pricing_unit.toLowerCase().includes('hour') ? (
+                            <>
+                              <div className="flex justify-between">
+                                <span className="text-stone-500">Rate per hour</span>
+                                <span className="font-medium text-stone-900">₹{selectedEquipment.price}</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-stone-500">× Number of hours ({form.start_time || '–'} to {form.end_time || '–'})</span>
+                                <span className="font-medium text-stone-900">× {hoursCount}</span>
+                              </div>
+                            </>
+                          ) : (
+                            <>
+                              <div className="flex justify-between">
+                                <span className="text-stone-500">Rate per acre</span>
+                                <span className="font-medium text-stone-900">₹{selectedEquipment.price}</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-stone-500">× Land area</span>
+                                <span className="font-medium text-stone-900">
+                                  {form.land_area || 0} {form.land_area_unit}
+                                  {form.land_area_unit === 'hectares' && ` (≈ ${areaInAcres.toFixed(2)} acres)`}
+                                </span>
+                              </div>
+                            </>
+                          )}
+                          <div className="border-t border-dashed border-stone-300 pt-2">
+                            <div className="flex justify-between text-base">
+                              <span className="font-bold text-stone-900">Estimated Total</span>
+                              <span className="font-bold text-green-700">₹{new Intl.NumberFormat('en-IN').format(estPrice)}</span>
+                            </div>
+                          </div>
+                        </div>
+                        {!form.land_area && !selectedEquipment.pricing_unit.toLowerCase().includes('hour') && (
+                          <p className="mt-3 text-xs text-amber-600">Enter your land area to see the price calculation.</p>
+                        )}
+                        {selectedEquipment.pricing_unit.toLowerCase().includes('hour') && (!form.start_time || !form.end_time) && (
+                          <p className="mt-3 text-xs text-amber-600">Select start and end time to see the price calculation.</p>
+                        )}
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-center text-stone-500">Select equipment to see the price breakdown.</p>
+                  )}
+
+                  {status === 'error' && (
+                    <p className="mt-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</p>
+                  )}
+
+                  <button type="submit" disabled={status === 'submitting'} className="btn-primary mt-6 w-full sm:w-auto">
+                    {status === 'submitting' ? 'Submitting...' : 'Submit Booking Request'}
+                  </button>
+                  <p className="mt-3 text-xs text-stone-400">Your request will be reviewed before confirmation.</p>
+                </div>
+              </div>
+            </div>
+
             {/* Summary */}
             <div className="lg:col-span-1">
               <div className="card sticky top-20 p-6">
@@ -344,14 +463,7 @@ export default function BookingPage({ navigate, query }: Props) {
                   </div>
                 )}
 
-                {status === 'error' && (
-                  <p className="mt-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</p>
-                )}
-
-                <button type="submit" disabled={status === 'submitting'} className="btn-primary mt-6 w-full">
-                  {status === 'submitting' ? 'Submitting...' : 'Submit Booking Request'}
-                </button>
-                <p className="mt-3 text-center text-xs text-stone-400">Your request will be reviewed before confirmation.</p>
+                <p className="mt-4 text-center text-xs text-stone-400">Review the price breakdown below before submitting.</p>
               </div>
             </div>
           </form>
