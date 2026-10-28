@@ -60,7 +60,7 @@ ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 -- ============ WEBSITE_SETTINGS TABLE (singleton) ============
 CREATE TABLE IF NOT EXISTS website_settings (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  site_name text NOT NULL DEFAULT 'శ్రీ రేణుక ఎల్లమ్మ హార్వెస్టర్ & డోజర్',
+  site_name text NOT NULL DEFAULT 'AgriRent – Agricultural Equipment Booking',
   logo_url text,
   favicon_url text,
   hero_title text NOT NULL DEFAULT 'Book Agricultural Equipment for Your Farming Needs',
