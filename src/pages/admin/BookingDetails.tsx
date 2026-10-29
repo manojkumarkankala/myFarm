@@ -4,7 +4,7 @@ import type { Booking, BookingStatusHistory } from '@/lib/types';
 import { useAuth } from '@/lib/auth';
 import {
   ArrowLeft, Phone, MessageCircle, CheckCircle2, XCircle, Ban,
-  CheckCircle, CalendarClock, StickyNote, History,
+  CheckCircle, CalendarClock, StickyNote, History, Trash2, AlertTriangle,
 } from 'lucide-react';
 import { StatusBadge } from './AdminDashboard';
 
@@ -19,6 +19,7 @@ export default function BookingDetails({ bookingId, navigate }: Props) {
   const [history, setHistory] = useState<BookingStatusHistory[]>([]);
   const [loading, setLoading] = useState(true);
   const [action, setAction] = useState('');
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const [reason, setReason] = useState('');
   const [notes, setNotes] = useState('');
   const [reschedule, setReschedule] = useState({ date: '', start: '', end: '' });
@@ -79,6 +80,22 @@ export default function BookingDetails({ bookingId, navigate }: Props) {
       await refresh();
       setAction('');
       setReason('');
+      setConfirmDelete(false);
+    } catch (err) {
+      setMsg({ type: 'error', text: (err as Error).message });
+    }
+    setBusy(false);
+  };
+
+  const deleteBooking = async () => {
+    if (!booking) return;
+    setBusy(true);
+    setMsg(null);
+    try {
+      const { error } = await supabase.from('bookings').delete().eq('id', booking.id);
+      if (error) throw error;
+      setMsg({ type: 'success', text: 'Booking deleted.' });
+      setTimeout(() => navigate('/admin/bookings'), 800);
     } catch (err) {
       setMsg({ type: 'error', text: (err as Error).message });
     }
@@ -167,7 +184,25 @@ export default function BookingDetails({ bookingId, navigate }: Props) {
               <button onClick={() => doAction('cancel')} disabled={busy || booking.status === 'completed' || booking.status === 'cancelled'} className="inline-flex items-center gap-2 rounded-full bg-stone-200 px-4 py-2 text-sm font-semibold text-stone-700 hover:bg-stone-300">
                 <Ban size={16} /> Cancel
               </button>
+              <button onClick={() => setConfirmDelete(true)} disabled={busy} className="inline-flex items-center gap-2 rounded-full bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700">
+                <Trash2 size={16} /> Delete
+              </button>
             </div>
+
+            {confirmDelete && (
+              <div className="mt-4 rounded-xl border border-red-200 bg-red-50 p-4">
+                <p className="flex items-center gap-2 text-sm font-semibold text-red-800">
+                  <AlertTriangle size={16} /> Are you sure you want to delete this booking?
+                </p>
+                <p className="mt-1 text-xs text-red-700">This permanently removes the booking and its status history. This cannot be undone.</p>
+                <div className="mt-3 flex gap-2">
+                  <button onClick={deleteBooking} disabled={busy} className="inline-flex items-center gap-2 rounded-full bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-50">
+                    <Trash2 size={15} /> Yes, Delete
+                  </button>
+                  <button onClick={() => setConfirmDelete(false)} disabled={busy} className="btn-ghost">No, Keep</button>
+                </div>
+              </div>
+            )}
 
             {action === 'reject' && (
               <div className="mt-4 rounded-xl bg-stone-50 p-4">
