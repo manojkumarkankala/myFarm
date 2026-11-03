@@ -68,6 +68,19 @@ function PublicShell() {
       <FloatingButtons />
     </div>
   );
+  <div className="myfarm-download">
+  <h2>MyFarm Android App</h2>
+
+  <p>Download our MyFarm application.</p>
+
+  <a
+    href="/MyFarm.apk"
+    download="MyFarm.apk"
+    className="download-btn"
+  >
+    📥 Download MyFarm APK
+  </a>
+</div>
 }
 
 function AdminShell() {
