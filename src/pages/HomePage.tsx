@@ -52,6 +52,31 @@ export default function HomePage({ navigate }: Props) {
   return (
     <div>
       <Hero navigate={navigate} />
+            {/* MyFarm APK Download Section */}
+      <section className="section py-12">
+        <div className="rounded-3xl bg-green-50 p-8 text-center shadow-md">
+          <h2 className="text-3xl font-bold text-green-800">
+            Download MyFarm App
+          </h2>
+
+          <p className="mt-3 text-stone-600">
+            Book drones, harvesters and agricultural equipment
+            directly from your mobile.
+          </p>
+
+          <a
+            href="/MyFarm.apk"
+            download="MyFarm.apk"
+            className="mt-6 inline-flex items-center justify-center rounded-xl bg-green-700 px-8 py-4 font-bold text-white hover:bg-green-800"
+          >
+            📥 Download MyFarm APK
+          </a>
+
+          <p className="mt-3 text-sm text-stone-500">
+            Android Application • Version 1.0
+          </p>
+        </div>
+      </section>
 
       {/* Owner Info Section */}
       {profile && (
