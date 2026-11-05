@@ -184,6 +184,16 @@ export interface Faq {
   created_at: string;
 }
 
+export interface Notification {
+  id: string;
+  type: string;
+  booking_id: string | null;
+  title: string;
+  message: string;
+  is_read: boolean;
+  created_at: string;
+}
+
 export interface Enquiry {
   id: string;
   name: string;
