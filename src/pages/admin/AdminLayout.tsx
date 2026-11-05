@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { useState } from 'react';
+import NotificationBell from './NotificationBell';
 
 interface Props {
   navigate: (to: string) => void;
@@ -49,6 +50,7 @@ export default function AdminLayout({ navigate, currentPath, children }: Props) 
             <span className="font-bold text-stone-900">AgriRent Admin</span>
           </div>
           <div className="flex items-center gap-2">
+            <NotificationBell navigate={navigate} />
             <button onClick={() => navigate('/')} className="hidden items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm text-stone-600 hover:bg-stone-100 sm:flex">
               <ExternalLink size={15} /> View Site
             </button>
